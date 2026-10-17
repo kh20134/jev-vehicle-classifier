@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jev-vehicle-classifier"
+version = "0.1.0"
+description = "도로교통량 조사지침 12종 차종을 TypeSafe Jev Choice로 고르는 ITS 연재 1회"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Choi Gyuseon" }]
+keywords = ["its", "typesafe", "jev", "vehicle-classification"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.optional-dependencies]
+live = ["typesafe-sdk>=0.7"]
+dev = ["pytest>=8"]
+
+[project.urls]
+Documentation = "https://docs.typesafe.ai/introduction/quickstart"
+Homepage = "https://github.com/kh20134/jev-vehicle-classifier"
+Source = "https://github.com/kh20134/jev-vehicle-classifier"
+
+[project.scripts]
+jev-vehicle = "jev_vehicle.cli:console_main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+jev_vehicle = ["data/samples/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

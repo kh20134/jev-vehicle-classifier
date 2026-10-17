@@ -1,0 +1,23 @@
+{
+  "source_id": "sample-truck-3axle-001",
+  "extractor": "mock",
+  "axle_count": 3,
+  "length_m": 9.8,
+  "width_m": 2.49,
+  "height_m": 3.4,
+  "wheel_count": 10,
+  "body_type": "box_truck",
+  "body_hints": [
+    "cargo",
+    "rigid",
+    "tandem_rear_axle"
+  ],
+  "gross_weight_class_hint": "over_2_5t",
+  "seating_layout": null,
+  "has_trailer": false,
+  "is_towing": false,
+  "is_towed": false,
+  "lane": "1",
+  "speed_kmh": 68,
+  "notes": "단일 차체 3축 대형 카고. 후축이 탠덤입니다."
+}

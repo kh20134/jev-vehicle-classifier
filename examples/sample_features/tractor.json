@@ -1,0 +1,22 @@
+{
+  "source_id": "sample-tractor-001",
+  "extractor": "mock",
+  "axle_count": 3,
+  "length_m": 6.3,
+  "width_m": 2.49,
+  "height_m": 3.8,
+  "wheel_count": 10,
+  "body_type": "tractor",
+  "body_hints": [
+    "fifth_wheel",
+    "no_cargo_body"
+  ],
+  "gross_weight_class_hint": "over_2_5t",
+  "seating_layout": null,
+  "has_trailer": true,
+  "is_towing": true,
+  "is_towed": false,
+  "lane": "1",
+  "speed_kmh": 72,
+  "notes": "세미트레일러를 끄는 트랙터 헤드. 피견인 차체는 별도 관측입니다."
+}
