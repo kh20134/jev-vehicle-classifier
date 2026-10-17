@@ -1,0 +1,23 @@
+{
+  "source_id": "sample-bus-city-001",
+  "extractor": "mock",
+  "axle_count": 2,
+  "length_m": 11.0,
+  "width_m": 2.49,
+  "height_m": 3.2,
+  "wheel_count": 6,
+  "body_type": "city_bus",
+  "body_hints": [
+    "passenger",
+    "multiple_doors",
+    "wide_aisle"
+  ],
+  "gross_weight_class_hint": null,
+  "seating_layout": "standing_allowed",
+  "has_trailer": false,
+  "is_towing": false,
+  "is_towed": false,
+  "lane": "3",
+  "speed_kmh": 41,
+  "notes": "시내버스형. 입석이 가능한 넓은 통로."
+}

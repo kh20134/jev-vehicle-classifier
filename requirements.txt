@@ -1,0 +1,6 @@
+# 테스트. mock 분류와 CLI는 표준 라이브러리만으로 동작합니다.
+pytest>=8
+
+# 라이브 Jev. 호출하려면 TYPESAFE_API_KEY가 필요합니다.
+# 이 패키지가 없어도, 키가 없어도 pytest와 --mock은 통과합니다.
+typesafe-sdk>=0.7

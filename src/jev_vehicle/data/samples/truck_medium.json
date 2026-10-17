@@ -1,0 +1,22 @@
+{
+  "source_id": "sample-truck-medium-001",
+  "extractor": "mock",
+  "axle_count": 2,
+  "length_m": 6.4,
+  "width_m": 2.05,
+  "height_m": 2.6,
+  "wheel_count": 6,
+  "body_type": "cargo_medium",
+  "body_hints": [
+    "cargo_bed",
+    "cab_over"
+  ],
+  "gross_weight_class_hint": "1_to_2_5t",
+  "seating_layout": null,
+  "has_trailer": false,
+  "is_towing": false,
+  "is_towed": false,
+  "lane": "1",
+  "speed_kmh": 70,
+  "notes": "1톤 초과 2.5톤 이하로 보이는 중형 카고. 2축."
+}

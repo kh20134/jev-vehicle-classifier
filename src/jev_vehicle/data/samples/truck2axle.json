@@ -1,0 +1,23 @@
+{
+  "source_id": "sample-truck-2axle-001",
+  "extractor": "mock",
+  "axle_count": 2,
+  "length_m": 8.6,
+  "width_m": 2.4,
+  "height_m": 3.3,
+  "wheel_count": 6,
+  "body_type": "box_truck",
+  "body_hints": [
+    "cargo",
+    "rigid",
+    "closed_box"
+  ],
+  "gross_weight_class_hint": "over_2_5t",
+  "seating_layout": null,
+  "has_trailer": false,
+  "is_towing": false,
+  "is_towed": false,
+  "lane": "1",
+  "speed_kmh": 74,
+  "notes": "2.5톤을 넘는 2축 대형 윙바디. 트레일러는 없습니다."
+}
