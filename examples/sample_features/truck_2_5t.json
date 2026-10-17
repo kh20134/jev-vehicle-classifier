@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": 4.5,
+  "seat_count": 2,
+  "length_m": 8.2,
+  "width_m": 2.4,
+  "height_m": 3.1,
+  "wheel_count": 6,
+  "body_type": "box_truck",
+  "body_hints": [
+    "cargo",
+    "rigid"
+  ],
+  "lane": "1",
+  "speed_kmh": 72,
+  "notes": "최대 적재량 4.5톤. 2.5톤 이상, 2축 1단위 카고.",
+  "source_id": "sample-truck-2-5t-001"
+}

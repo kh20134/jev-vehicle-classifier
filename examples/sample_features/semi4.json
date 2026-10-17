@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 4,
+  "unit_count": 2,
+  "trailer_type": "semi",
+  "load_tonnage_t": null,
+  "seat_count": null,
+  "length_m": 13.5,
+  "width_m": 2.5,
+  "height_m": 4.0,
+  "wheel_count": 14,
+  "body_type": "semi",
+  "body_hints": [
+    "combination",
+    "fifth_wheel"
+  ],
+  "lane": "1",
+  "speed_kmh": 75,
+  "notes": "세미트레일러 조합. 축 4, 단위 2. 견인차와 피견인차를 한 대로 셉니다.",
+  "source_id": "sample-semi-4-001"
+}

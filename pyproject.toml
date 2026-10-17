@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jev-vehicle-classifier"
-version = "0.1.0"
+version = "0.1.1"
 description = "도로교통량 조사지침 12종 차종을 TypeSafe Jev Choice로 고르는 ITS 연재 1회"
 readme = "README.md"
 requires-python = ">=3.10"

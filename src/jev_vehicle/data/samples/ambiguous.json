@@ -1,7 +1,10 @@
 {
-  "source_id": "sample-ambiguous-night-001",
   "extractor": "mock",
   "axle_count": null,
+  "unit_count": null,
+  "trailer_type": null,
+  "load_tonnage_t": null,
+  "seat_count": null,
   "length_m": 7.4,
   "width_m": null,
   "height_m": 2.9,
@@ -12,12 +15,8 @@
     "glare",
     "partial_occlusion"
   ],
-  "gross_weight_class_hint": null,
-  "seating_layout": null,
-  "has_trailer": null,
-  "is_towing": null,
-  "is_towed": null,
   "lane": "2",
   "speed_kmh": 54,
-  "notes": "야간 역광이라 축과 차체를 구분하기 어렵습니다. 자동 집계 대신 검토가 필요합니다."
+  "notes": "야간 역광이라 축수와 단위를 구분하기 어렵습니다.",
+  "source_id": "sample-ambiguous-night-001"
 }

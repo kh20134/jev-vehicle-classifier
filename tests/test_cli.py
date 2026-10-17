@@ -20,9 +20,12 @@ def _env() -> dict[str, str]:
 
 def test_mock_prints_code_name_probability_confidence():
     expected = {
-        "sedan": ("class_01", "승용차"),
-        "truck3axle": ("class_07", "대형화물(3축)"),
-        "bus": ("class_02", "버스(좌석)"),
+        "sedan": ("class_01", "승용차·미니트럭"),
+        "truck3axle": ("class_05", "중형화물 A"),
+        "bus": ("class_02", "버스"),
+        "truck_2_5t": ("class_04", "소형화물 B"),
+        "semi5": ("class_10", "대형화물 C"),
+        "full4": ("class_09", "대형화물 B"),
     }
     for sample, (code, name) in expected.items():
         completed = subprocess.run(
@@ -38,6 +41,7 @@ def test_mock_prints_code_name_probability_confidence():
         assert f"한글명: {name}" in completed.stdout
         assert "confidence:" in completed.stdout
         assert "확률 분포:" in completed.stdout
+        assert "집계: TRA_" in completed.stdout
         assert code in completed.stdout
 
 
@@ -46,9 +50,11 @@ def test_features_path_and_json(capsys):
     code = main(["classify", "--features", str(path), "--mock", "--json"])
     assert code == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["class_code"] == "class_12"
-    assert payload["name_ko"] == "이륜차"
-    assert payload["needs_review"] is False
+    assert payload["needs_review"] is True
+    assert payload["out_of_scope"] is True
+    assert payload["counted_as"] == "TRA_미분류"
+    assert payload["class_code"].startswith("class_")
+    assert "이륜차" not in payload["name_ko"]
     assert "confidence" in payload
     assert abs(sum(payload["probabilities"].values()) - 1) < 1e-9
 
@@ -58,6 +64,7 @@ def test_ambiguous_cli_routes_to_review(capsys):
     assert code == 0
     text = capsys.readouterr().out
     assert "needs_review: true" in text
+    assert "TRA_미분류" in text
     assert "13번째 차종이 아닙니다" in text
 
 

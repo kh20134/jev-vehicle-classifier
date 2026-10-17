@@ -1,8 +1,11 @@
 {
-  "source_id": "sample-truck-5axle-001",
   "extractor": "mock",
   "axle_count": 5,
-  "length_m": 12.4,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": 20.0,
+  "seat_count": null,
+  "length_m": 12.0,
   "width_m": 2.5,
   "height_m": 3.6,
   "wheel_count": 14,
@@ -11,12 +14,8 @@
     "cargo",
     "rigid"
   ],
-  "gross_weight_class_hint": "over_2_5t",
-  "seating_layout": null,
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "1",
   "speed_kmh": 58,
-  "notes": "5축 단일 차체 대형 화물. 트랙터-트레일러가 아닙니다."
+  "notes": "5축 1단위 단일 차체.",
+  "source_id": "sample-truck-5axle-001"
 }

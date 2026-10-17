@@ -1,23 +1,21 @@
 {
-  "source_id": "sample-truck-4axle-001",
   "extractor": "mock",
   "axle_count": 4,
-  "length_m": 11.2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": 16.0,
+  "seat_count": null,
+  "length_m": 11.0,
   "width_m": 2.49,
   "height_m": 3.5,
   "wheel_count": 12,
   "body_type": "dump",
   "body_hints": [
     "cargo",
-    "rigid",
-    "dump_bed"
+    "rigid"
   ],
-  "gross_weight_class_hint": "over_2_5t",
-  "seating_layout": null,
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "1",
-  "speed_kmh": 61,
-  "notes": "4축 덤프. 견인 장치가 없고 적재함이 차체에 고정되어 있습니다."
+  "speed_kmh": 60,
+  "notes": "4축 1단위 덤프. 세미나 풀 트레일러가 아닙니다.",
+  "source_id": "sample-truck-4axle-001"
 }

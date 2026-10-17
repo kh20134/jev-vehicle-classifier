@@ -1,7 +1,10 @@
 {
-  "source_id": "sample-truck-3axle-001",
   "extractor": "mock",
   "axle_count": 3,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": 11.0,
+  "seat_count": null,
   "length_m": 9.8,
   "width_m": 2.49,
   "height_m": 3.4,
@@ -9,15 +12,10 @@
   "body_type": "box_truck",
   "body_hints": [
     "cargo",
-    "rigid",
-    "tandem_rear_axle"
+    "rigid"
   ],
-  "gross_weight_class_hint": "over_2_5t",
-  "seating_layout": null,
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "1",
   "speed_kmh": 68,
-  "notes": "단일 차체 3축 대형 카고. 후축이 탠덤입니다."
+  "notes": "3축 1단위 화물. 트레일러가 없습니다.",
+  "source_id": "sample-truck-3axle-001"
 }

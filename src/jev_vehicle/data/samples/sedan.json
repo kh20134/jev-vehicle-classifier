@@ -1,7 +1,10 @@
 {
-  "source_id": "sample-sedan-001",
   "extractor": "mock",
   "axle_count": 2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": null,
+  "seat_count": 5,
   "length_m": 4.65,
   "width_m": 1.82,
   "height_m": 1.47,
@@ -9,15 +12,10 @@
   "body_type": "sedan",
   "body_hints": [
     "passenger",
-    "enclosed_cabin",
-    "no_cargo_bed"
+    "enclosed_cabin"
   ],
-  "gross_weight_class_hint": null,
-  "seating_layout": "passenger",
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "2",
   "speed_kmh": 78,
-  "notes": "주간 본선. 세단 실루엣. 번호판과 얼굴은 특징에 넣지 않습니다."
+  "notes": "승용차. 2축 1단위, 16인승 미만. 번호판은 넣지 않습니다.",
+  "source_id": "sample-sedan-001"
 }
