@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 4,
+  "unit_count": 2,
+  "trailer_type": "full",
+  "load_tonnage_t": null,
+  "seat_count": null,
+  "length_m": 14.2,
+  "width_m": 2.5,
+  "height_m": 3.8,
+  "wheel_count": 14,
+  "body_type": "full",
+  "body_hints": [
+    "combination",
+    "drawbar"
+  ],
+  "lane": "1",
+  "speed_kmh": 70,
+  "notes": "풀트레일러 조합. 축 4, 단위 2. 한 대의 통행으로 셉니다.",
+  "source_id": "sample-full-4-001"
+}

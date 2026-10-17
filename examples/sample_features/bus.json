@@ -1,23 +1,21 @@
 {
-  "source_id": "sample-bus-seated-001",
   "extractor": "mock",
   "axle_count": 2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": null,
+  "seat_count": 45,
   "length_m": 12.0,
   "width_m": 2.49,
-  "height_m": 3.45,
+  "height_m": 3.4,
   "wheel_count": 6,
-  "body_type": "coach",
+  "body_type": "bus",
   "body_hints": [
     "passenger",
-    "baggage_bays",
-    "no_standing"
+    "sixteen_seats_or_more"
   ],
-  "gross_weight_class_hint": null,
-  "seating_layout": "seated_only",
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "2",
-  "speed_kmh": 92,
-  "notes": "고속버스형. 전 좌석이고 입석 공간이 없습니다."
+  "speed_kmh": 88,
+  "notes": "16인승 이상 버스. 좌석형과 입석형을 나누지 않습니다.",
+  "source_id": "sample-bus-001"
 }

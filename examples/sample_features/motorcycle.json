@@ -1,7 +1,10 @@
 {
-  "source_id": "sample-motorcycle-001",
   "extractor": "mock",
   "axle_count": 2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": null,
+  "seat_count": null,
   "length_m": 2.1,
   "width_m": 0.75,
   "height_m": 1.15,
@@ -10,12 +13,8 @@
   "body_hints": [
     "two_wheeler"
   ],
-  "gross_weight_class_hint": null,
-  "seating_layout": null,
-  "has_trailer": false,
-  "is_towing": false,
-  "is_towed": false,
   "lane": "2",
   "speed_kmh": 55,
-  "notes": "이륜차. 차체가 매우 짧습니다."
+  "notes": "이륜차. 도로교통량조사 12종에 없습니다.",
+  "source_id": "sample-motorcycle-001"
 }

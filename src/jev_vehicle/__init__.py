@@ -9,7 +9,7 @@ from jev_vehicle.classes import VEHICLE_CLASSES, VehicleClass
 from jev_vehicle.classifier import ClassificationResult, classify
 from jev_vehicle.features import VehicleFeatures
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "ClassificationResult",

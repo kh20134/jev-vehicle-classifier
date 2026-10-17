@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 2,
+  "unit_count": 1,
+  "trailer_type": "none",
+  "load_tonnage_t": 1.5,
+  "seat_count": 3,
+  "length_m": 5.8,
+  "width_m": 1.9,
+  "height_m": 2.4,
+  "wheel_count": 6,
+  "body_type": "cargo",
+  "body_hints": [
+    "cargo_bed",
+    "cab_over"
+  ],
+  "lane": "2",
+  "speed_kmh": 66,
+  "notes": "최대 적재량 1.5톤. 2축 1단위, 1톤 이상 2.5톤 미만.",
+  "source_id": "sample-cargo-a-001"
+}

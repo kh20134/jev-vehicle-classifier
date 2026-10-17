@@ -34,7 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="jev-vehicle",
         description=(
-            "도로교통량 조사지침 12종 차종을 TypeSafe Jev Choice로 고릅니다. "
+            "도로교통량조사 12종 차종분류를 TypeSafe Jev Choice로 고릅니다. "
             "연재 1회는 이미지 대신 특징 JSON을 읽습니다."
         ),
     )
@@ -47,7 +47,7 @@ def build_parser() -> argparse.ArgumentParser:
     source = classify_parser.add_mutually_exclusive_group(required=True)
     source.add_argument(
         "--sample",
-        help="내장 샘플 이름. 예: sedan, truck3axle, bus, motorcycle, ambiguous",
+        help="내장 샘플 이름. 예: sedan, bus, truck_2_5t, truck3axle, semi5, full4",
     )
     source.add_argument(
         "--features",
@@ -133,7 +133,6 @@ def format_text_report(result: ClassificationResult) -> str:
 
     mode_line = "mock (Jev를 호출하지 않음)" if result.mode == "mock" else "live"
     model_line = result.model or "(없음)"
-    routing = "needs_review" if result.needs_review else "auto"
     lines = [
         f"모드: {mode_line}",
         f"모델: {model_line}",
@@ -144,10 +143,12 @@ def format_text_report(result: ClassificationResult) -> str:
         f"차종 코드: {result.class_code}",
         f"한글명: {result.name_ko}",
         f"종 번호: {result.class_number}",
+        f"AVC 열: {result.tra_column} ({result.tra_column_ko})",
+        f"집계: {result.counted_as}",
         f"confidence: {result.confidence:.4f}",
         f"needs_review: {_bool_word(result.needs_review)}",
+        f"out_of_scope: {_bool_word(result.out_of_scope)}",
         f"검토 임계값: {result.threshold:.2f}",
-        f"라우팅: {routing}",
         "",
         "확률 분포:",
     ]
@@ -163,18 +164,19 @@ def format_text_report(result: ClassificationResult) -> str:
         lines.extend(
             [
                 "",
-                "낮은 confidence라 사람 검토로 라우팅합니다.",
-                "needs_review는 13번째 차종이 아닙니다.",
+                f"집계는 {result.counted_as}입니다. 미분류는 13번째 차종이 아닙니다.",
             ]
         )
+        if result.review_reason:
+            lines.append(result.review_reason)
     lines.append("")
     return "\n".join(lines)
 
 
 def write_classes(out: TextIO) -> None:
-    out.write("코드        번호  한글명\n")
+    out.write("코드        번호  AVC 열     한글명\n")
     for item in VEHICLE_CLASSES:
-        out.write(f"{item.code}  {item.number:>2}    {item.name_ko}\n")
+        out.write(f"{item.code}  {item.number:>2}    {item.tra_column_ko:<8}  {item.name_ko}\n")
 
 
 def write_samples(out: TextIO) -> None:

@@ -1,7 +1,7 @@
 # 연재 계획
 
 최규선(Choi Gyuseon, 정보관리기술사, ITS)의 차종 분류 연재입니다.
-도로 CCTV나 검지기에서 본 차량을 **도로교통량 조사지침 12종**으로 나누고,
+도로 CCTV나 검지기에서 본 차량을 **도로교통량조사 12종 차종분류**로 나누고,
 마지막 선택은 TypeSafe Jev(System One)의 Choice에 맡깁니다.
 
 Jev는 이미지를 분류하는 CNN이 아닙니다. 텍스트와 JSON state를 보고
@@ -11,12 +11,13 @@ Jev는 이미지를 분류하는 CNN이 아닙니다. 텍스트와 JSON state를
 
 ## 연재 1회 — 골격과 mock (이번, v0.1, 완료)
 
-- 저장소, 12종 코드 `class_01` … `class_12`, MIT 라이선스
-- `VehicleFeatures`와 `to_state()` — 축수, 길이, 차체, 톤수 힌트, 견인 역할
+- 저장소, 12종 코드 `class_01` … `class_12`. [분류표](http://www.road.re.kr/intro/intro_04.asp)의 축수·단위 기준
+- AVC 원시자료 열 `TRA_01종` … `TRA_12종`. 표 밖과 저신뢰는 `TRA_미분류`
+- `VehicleFeatures`와 `to_state()` — 축수, 단위, 트레일러(`semi`/`full`), 최대 적재 톤
 - 이미지 가중치 없이 샘플 JSON을 읽는 mock 추출기
-- TypeSafe Jev Choice 호출 (`jev-latest`)
+- TypeSafe Jev Choice 호출 (`jev-latest`). 응답은 `response.answers`
 - 키가 없거나 `--mock`이면 `MockJevClient`의 결정적 데모
-- confidence가 임계값보다 낮으면 `needs_review` (13번째 차종이 아님)
+- 이륜차처럼 표에 없거나 confidence가 임계값보다 낮으면 `needs_review` (13번째 차종이 아님)
 - CLI 데모와 오프라인 테스트
 
 임계값 `0.45`는 자리표시자입니다. 보정 전 숫자를 운영 기준으로 쓰지 않습니다.
@@ -33,7 +34,7 @@ Jev는 이미지를 분류하는 CNN이 아닙니다. 텍스트와 JSON state를
 
 - 현장 영상이나 공개 자료로 평가 세트를 만듭니다.
 - 지침 차종과 모델 차종을 대조하고 혼동행렬을 봅니다.
-- 경계 사례를 적습니다. 1톤 경계, 2축 대형과 중형, 견인차와 피견인차의 분리.
+- 경계 사례를 적습니다. 1톤과 2.5톤, 세미와 풀, 축을 하나 잘못 센 조합. 조합은 한 대입니다.
 - 번호판과 얼굴은 라벨 데이터에 남기지 않습니다.
 
 ## 연재 4회 — confidence 보정 (계획)
@@ -45,8 +46,8 @@ Jev는 이미지를 분류하는 CNN이 아닙니다. 텍스트와 JSON state를
 
 ## 연재 5회 — 현장 ITS 연계 (계획)
 
-- VDS, AVC, 교통정보센터로 분류 결과를 넘기는 자리를 만듭니다.
-- `needs_review` 건은 사람 검토 큐로 라우팅합니다.
+- 한국도로공사 AVC 원시자료의 `TRA_01종` … `TRA_12종`, `TRA_미분류`에 교통량을 더하는 자리를 만듭니다.
+- `needs_review` 건은 사람 검토 큐로 라우팅하고, 확정 전에는 `TRA_미분류`에만 둡니다.
 - 집계 시각, 차로, 지점 ID를 state 옆의 운영 메타데이터로 둡니다. Choice 질문과는 분리합니다.
 - 키와 영상 접근 권한은 센터 쪽에 두고, 저장소에는 예제만 둡니다.
 

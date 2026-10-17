@@ -15,18 +15,24 @@ from typing import Mapping, Protocol
 from jev_vehicle.features import VehicleFeatures
 
 # CLI 별칭. 왼쪽 이름을 치면 오른쪽 샘플 파일을 읽습니다.
+# 좌석/입석 버스와 이륜차 별칭은 옛 이름을 새 의미로 연결합니다.
+# 이륜차 샘플은 12종이 아니라 TRA_미분류 데모입니다.
 SAMPLE_ALIASES: dict[str, str] = {
     "bus_seated": "bus",
+    "bus_city": "bus",
+    "bus_standing": "bus",
     "coach": "bus",
-    "bus_standing": "bus_city",
-    "city_bus": "bus_city",
+    "city_bus": "bus",
+    "truck25": "truck_2_5t",
+    "cargo_b": "truck_2_5t",
+    "cargo_a": "cargo_a",
+    "rigid3": "truck3axle",
+    "semi_5": "semi5",
+    "semitrailer5": "semi5",
+    "full_4": "full4",
+    "fulltrailer4": "full4",
     "bike": "motorcycle",
     "motorbike": "motorcycle",
-    "cargo_small": "truck_small",
-    "cargo_1t": "truck_small",
-    "cargo_medium": "truck_medium",
-    "rigid2": "truck2axle",
-    "rigid3": "truck3axle",
 }
 
 

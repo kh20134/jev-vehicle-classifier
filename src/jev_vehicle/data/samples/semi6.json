@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 6,
+  "unit_count": 2,
+  "trailer_type": "semi",
+  "load_tonnage_t": null,
+  "seat_count": null,
+  "length_m": 17.2,
+  "width_m": 2.5,
+  "height_m": 4.0,
+  "wheel_count": 22,
+  "body_type": "semi",
+  "body_hints": [
+    "combination",
+    "fifth_wheel"
+  ],
+  "lane": "1",
+  "speed_kmh": 70,
+  "notes": "세미트레일러 조합. 축 6 이상, 단위 2.",
+  "source_id": "sample-semi-6-001"
+}

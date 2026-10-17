@@ -1,0 +1,21 @@
+{
+  "extractor": "mock",
+  "axle_count": 5,
+  "unit_count": 2,
+  "trailer_type": "full",
+  "load_tonnage_t": null,
+  "seat_count": null,
+  "length_m": 16.5,
+  "width_m": 2.5,
+  "height_m": 3.9,
+  "wheel_count": 18,
+  "body_type": "full",
+  "body_hints": [
+    "combination",
+    "drawbar"
+  ],
+  "lane": "1",
+  "speed_kmh": 68,
+  "notes": "풀트레일러 조합. 축 5, 단위 2.",
+  "source_id": "sample-full-5-001"
+}

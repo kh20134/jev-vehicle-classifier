@@ -7,16 +7,16 @@
             state=features.to_state(),
             questions={"vehicle_class": Choice(instructions=..., criteria=...)},
         )
-        answer = response.choices["vehicle_class"]
+        answer = response.answers["vehicle_class"]
         answer.choice, answer.probabilities, answer.confidence
 
 이미지는 넘기지 않습니다. state는 ``VehicleFeatures.to_state()`` JSON입니다.
+Python SDK의 ``answers``는 퀵스타트 응답 JSON의 ``answers``와 같습니다.
 
-``needs_review``는 13번째 Choice 선택지가 아닙니다. 지침 차종은 12개이고,
-확신이 낮을 때 사람 검토로 보내는 일은 애플리케이션 정책입니다.
-Choice에 '미분류'를 넣으면 확률이 차종이 아닌 쪽으로 새고,
-집계 코드도 지침과 어긋납니다. Jev는 항상 12개 중 하나를 고르게 두고,
-``confidence``가 임계값보다 낮으면 ``needs_review``만 켭니다.
+``TRA_미분류``와 ``needs_review``는 13번째 Choice 선택지가 아닙니다.
+분류표는 12종이고, AVC 원시자료의 미분류 열은 집계 정책입니다.
+이륜차처럼 표 밖이거나 confidence가 임계값보다 낮으면
+Choice가 고른 12종은 참고만 하고 집계는 ``TRA_미분류``로 둡니다.
 
 연재 1회의 임계값 0.45는 자리표시자입니다. 12지선다에서 confidence
 0.45는 대략 최상위 확률 0.50에 해당합니다. 현장 보정은 이후 회차입니다.
@@ -32,7 +32,13 @@ import os
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
-from jev_vehicle.classes import CLASS_CODES, VEHICLE_CLASSES, VehicleClass, get_class
+from jev_vehicle.classes import (
+    CLASS_CODES,
+    UNCLASSIFIED_COLUMN,
+    VEHICLE_CLASSES,
+    VehicleClass,
+    get_class,
+)
 from jev_vehicle.features import VehicleFeatures
 
 # 문서의 모델 별칭. 고정 버전으로 잠그지 않습니다.
@@ -43,24 +49,25 @@ QUESTION_ID = "vehicle_class"
 # 최상위 확률이 절반 근처일 때부터 자동 집계한다는 보수적인 시작점.
 DEFAULT_REVIEW_CONFIDENCE = 0.45
 
+# 실제로 헷갈리는 이웃만 둡니다. 모두 두 개라 데모 확률의 합이 맞습니다.
 _NEIGHBORS: dict[str, tuple[str, ...]] = {
-    "class_01": ("class_04", "class_12"),
-    "class_02": ("class_03", "class_01"),
-    "class_03": ("class_02", "class_06"),
-    "class_04": ("class_01", "class_05"),
+    "class_01": ("class_02", "class_03"),
+    "class_02": ("class_01", "class_04"),
+    "class_03": ("class_01", "class_04"),
+    "class_04": ("class_03", "class_05"),
     "class_05": ("class_04", "class_06"),
     "class_06": ("class_05", "class_07"),
-    "class_07": ("class_06", "class_08", "class_10"),
-    "class_08": ("class_07", "class_09"),
-    "class_09": ("class_08", "class_10"),
-    "class_10": ("class_11", "class_07"),
-    "class_11": ("class_10", "class_09"),
-    "class_12": ("class_01", "class_04"),
+    "class_07": ("class_06", "class_10"),
+    "class_08": ("class_09", "class_10"),
+    "class_09": ("class_08", "class_11"),
+    "class_10": ("class_08", "class_12"),
+    "class_11": ("class_09", "class_10"),
+    "class_12": ("class_10", "class_11"),
 }
 
-_PASSENGER_BODIES = {"sedan", "suv", "hatchback", "passenger_van"}
-_SEATED_LAYOUTS = {"seated", "seated_only"}
-_STANDING_LAYOUTS = {"standing", "standing_allowed"}
+_PASSENGER_BODIES = {"sedan", "suv", "hatchback", "passenger_van", "mini_truck"}
+_CARGO_BODIES = {"cargo", "cargo_small", "cargo_medium", "box_truck", "dump", "cargo_large"}
+_OUT_OF_SCOPE_BODIES = {"motorcycle", "bicycle", "pedestrian", "kickboard"}
 
 
 class ClassificationError(Exception):
@@ -84,9 +91,14 @@ class ClassificationResult:
     class_code: str
     class_number: int
     name_ko: str
+    tra_column: str
+    tra_column_ko: str
+    counted_as: str
     probabilities: dict[str, float]
     confidence: float
     needs_review: bool
+    out_of_scope: bool
+    review_reason: str | None
     threshold: float
     mode: str
     model: str | None
@@ -110,16 +122,21 @@ class ClassificationResult:
             "class_code": self.class_code,
             "class_number": self.class_number,
             "name_ko": self.name_ko,
+            "tra_column": self.tra_column,
+            "tra_column_ko": self.tra_column_ko,
+            "counted_as": self.counted_as,
             "probabilities": ordered,
             "confidence": self.confidence,
             "needs_review": self.needs_review,
+            "out_of_scope": self.out_of_scope,
+            "review_reason": self.review_reason,
             "threshold": self.threshold,
             "mode": self.mode,
             "model": self.model,
             "source_id": self.source_id,
             "extractor": self.extractor,
             "summary_ko": self.summary_ko,
-            "routing": "needs_review" if self.needs_review else "auto",
+            "routing": UNCLASSIFIED_COLUMN if self.needs_review else self.tra_column,
         }
 
 
@@ -147,16 +164,20 @@ def vehicle_class_question() -> dict[str, Any]:
 
     return {
         "instructions": (
-            "Choose the single vehicle class from Korea's road traffic-volume "
-            "survey guideline (도로교통량 조사지침). Use only the structured "
-            "observation in the state: axle count, length, body type, weight-class "
-            "hint, seating layout, and whether the vehicle is towing or towed. "
+            "Choose the single vehicle class from the Korea road traffic-volume "
+            "survey 12-class table (도로교통량조사 12종 차종분류, "
+            "Korea Institute of Civil Engineering and Building Technology). "
+            "Use only the structured observation: axle_count, unit_count, "
+            "trailer_type (none, semi, or full), load_tonnage_t, seat_count, and body. "
             "The state is text and JSON, not a photograph. "
+            "unit_count 2 is one vehicle: the tractor and the trailer together. "
+            "Do not split that combination into two classes. "
+            "A bus of 16 or more seats is one class. Do not split seated and standing buses. "
+            "There is no motorcycle class. "
+            "2-axle 1-unit cargo splits at 1 tonne and at 2.5 tonnes: "
+            "under 1 tonne is class_01, 1 tonne up to but not including 2.5 is class_03, "
+            "2.5 tonnes or more is class_04. "
             "Pick the one criteria entry that best matches. "
-            "Cargo classes split on the weight hint and axle count. "
-            "Buses split on seating layout: seated versus standing. "
-            "A tractor that tows is class_10 (특수(견인)); "
-            "the towed trailer is class_11 (특수(피견인)). "
             "Do not invent a class outside the criteria."
         ),
         "criteria": {item.code: item.criteria() for item in VEHICLE_CLASSES},
@@ -285,7 +306,7 @@ class MockJevClient:
             probabilities=probabilities,
             confidence=confidence,
         )
-        return _DemoResponse(choices={QUESTION_ID: answer})
+        return _DemoResponse(answers={QUESTION_ID: answer})
 
 
 @dataclass(frozen=True)
@@ -297,58 +318,101 @@ class _DemoChoice:
 
 @dataclass(frozen=True)
 class _DemoResponse:
-    choices: dict[str, _DemoChoice]
+    """퀵스타트 응답의 ``answers`` 키와 같은 자리입니다."""
+
+    answers: dict[str, _DemoChoice]
+
+    @property
+    def choices(self) -> dict[str, _DemoChoice]:
+        return self.answers
+
+
+def out_of_scope_reason(features: VehicleFeatures) -> str | None:
+    """12종 표에 없는 관측이면 이유를, 아니면 None.
+
+    이륜차는 차종이 아닙니다. 6축 이상 풀트레일러도 표에 없습니다.
+    집계는 ``TRA_미분류``이고, Choice에 칸을 추가하지 않습니다.
+    """
+
+    body = (features.body_type or "").lower()
+    if body in _OUT_OF_SCOPE_BODIES or features.wheel_count == 2:
+        return "조사 12종 밖입니다. 이륜차 등은 TRA_미분류로 둡니다."
+    trailer = (features.trailer_type or "").lower()
+    if (
+        features.unit_count == 2
+        and trailer == "full"
+        and features.axle_count is not None
+        and features.axle_count >= 6
+    ):
+        return "6축 이상 풀트레일러는 12종 표에 없습니다."
+    if features.unit_count is not None and features.unit_count not in (1, 2):
+        return "단위는 1 또는 2만 분류표에 있습니다."
+    return None
 
 
 def demo_decision(features: VehicleFeatures) -> tuple[str, str]:
     """데모가 고를 코드와 ``high``/``low``.
 
-    순서가 경계입니다. 견인·피견인을 축수보다 먼저 봐서,
-    3축 트랙터가 3축 대형화물로 떨어지지 않게 합니다.
-    6축 이상 단일 차체는 9종 칸이 없어서 9종으로 기울이고 low로 둡니다.
+    2단위 조합을 먼저 봐서, 세미와 풀을 축수가 같은 1단위 화물과
+    섞지 않습니다. 표 밖 차량도 12종 중 기울임만 두고, 집계에서 뺍니다.
     """
 
     body = (features.body_type or "").lower()
-    layout = (features.seating_layout or "").lower()
-    weight = (features.gross_weight_class_hint or "").lower()
+    trailer = (features.trailer_type or "").lower()
     axles = features.axle_count
+    units = features.unit_count
+    load = features.load_tonnage_t
+    seats = features.seat_count
+    combination = units == 2 or trailer in {"semi", "full"}
 
-    if features.is_towing is True and features.is_towed is True:
-        return "class_10", "low"
+    if units == 1 and trailer in {"semi", "full"}:
+        return _weak_guess(features.length_m), "low"
 
-    if body == "motorcycle" or features.wheel_count == 2:
-        return "class_12", "high"
-    if features.is_towed is True or body in {"trailer", "semitrailer"}:
-        return "class_11", "high"
-    if features.is_towing is True or body == "tractor":
-        return "class_10", "high"
-    if axles is not None and axles >= 6:
-        return "class_09", "low"
-    if axles == 5:
-        return "class_09", "high"
-    if axles == 4:
-        return "class_08", "high"
+    if combination:
+        if trailer not in {"semi", "full"} or axles is None:
+            return _weak_guess(features.length_m), "low"
+        if axles == 4 and trailer == "semi":
+            return "class_08", "high"
+        if axles == 4 and trailer == "full":
+            return "class_09", "high"
+        if axles == 5 and trailer == "semi":
+            return "class_10", "high"
+        if axles == 5 and trailer == "full":
+            return "class_11", "high"
+        if axles >= 6 and trailer == "semi":
+            return "class_12", "high"
+        if axles >= 6 and trailer == "full":
+            # 표에는 6축 이상 세미만 있습니다. 풀은 집계에서 미분류가 됩니다.
+            return "class_12", "low"
+        return _weak_guess(features.length_m), "low"
+
+    is_bus = (seats is not None and seats >= 16) or (
+        body == "bus" and (seats is None or seats >= 16)
+    )
+    if is_bus and axles in (2, None):
+        return "class_02", "high" if axles == 2 else "low"
     if axles == 3:
-        return "class_07", "high"
-    if body == "coach" or layout in _SEATED_LAYOUTS:
-        return "class_02", "high"
-    if body == "city_bus" or layout in _STANDING_LAYOUTS:
-        return "class_03", "high"
-    if body == "bus":
-        return "class_02", "low"
-    if weight == "under_1t" or body == "cargo_small":
-        return "class_04", "high"
-    if weight == "1_to_2_5t" or body == "cargo_medium":
         return "class_05", "high"
-    if body in {"box_truck", "dump", "cargo_large"} and axles == 2:
+    if axles == 4:
         return "class_06", "high"
-    if weight == "over_2_5t" and axles == 2:
-        return "class_06", "high"
-    if body in _PASSENGER_BODIES or layout == "passenger":
-        return "class_01", "high"
-
-    # 축도 차체도 없으면 길이로만 기울이고, 검토로 보냅니다.
+    if axles == 5:
+        return "class_07", "high"
+    if axles is not None and axles >= 6:
+        return "class_07", "low"
+    if axles == 2 or axles is None:
+        if (_is_cargo(body) or body == "mini_truck") and load is not None:
+            if load >= 2.5:
+                return "class_04", "high"
+            if load >= 1.0:
+                return "class_03", "high"
+            return "class_01", "high"
+        if body in _PASSENGER_BODIES or (seats is not None and seats < 16):
+            return "class_01", "high"
     return _weak_guess(features.length_m), "low"
+
+
+def _is_cargo(body: str) -> bool:
+    return body in _CARGO_BODIES or body in {"semi", "full"}
 
 
 def demo_probabilities(code: str, certainty: str) -> dict[str, float]:
@@ -389,15 +453,31 @@ def result_from_response(
         vehicle = get_class(choice)
     except KeyError as exc:
         raise ClassificationError(str(exc)) from exc
-    # 임계값 '미만'만 검토. 같은 값은 자동으로 둡니다.
-    needs_review = confidence < threshold
+    scope = out_of_scope_reason(features)
+    # 임계값 '미만'만 저신뢰. 표 밖은 confidence와 상관없이 미분류입니다.
+    low_confidence = confidence < threshold
+    needs_review = scope is not None or low_confidence
+    if scope and low_confidence:
+        review_reason = f"{scope} confidence도 임계값보다 낮습니다."
+    elif scope:
+        review_reason = scope
+    elif low_confidence:
+        review_reason = "confidence가 검토 임계값보다 낮아 TRA_미분류로 둡니다."
+    else:
+        review_reason = None
+    counted_as = UNCLASSIFIED_COLUMN if needs_review else vehicle.tra_column
     return ClassificationResult(
         class_code=vehicle.code,
         class_number=vehicle.number,
         name_ko=vehicle.name_ko,
+        tra_column=vehicle.tra_column,
+        tra_column_ko=vehicle.tra_column_ko,
+        counted_as=counted_as,
         probabilities=probabilities,
         confidence=confidence,
         needs_review=needs_review,
+        out_of_scope=scope is not None,
+        review_reason=review_reason,
         threshold=threshold,
         mode=mode,
         model=model,
@@ -408,16 +488,16 @@ def result_from_response(
 
 
 def read_choice_answer(response: Any) -> tuple[str, dict[str, float], float]:
-    """SDK 응답의 ``choices``를 읽고, 없으면 ``answers``를 봅니다."""
+    """SDK 응답의 ``answers``를 읽고, 없으면 ``choices``를 봅니다."""
 
     answer = None
-    choices = getattr(response, "choices", None)
-    if isinstance(choices, Mapping) and QUESTION_ID in choices:
-        answer = choices[QUESTION_ID]
+    answers = getattr(response, "answers", None)
+    if isinstance(answers, Mapping) and QUESTION_ID in answers:
+        answer = answers[QUESTION_ID]
     if answer is None:
-        answers = getattr(response, "answers", None)
-        if isinstance(answers, Mapping):
-            answer = answers.get(QUESTION_ID)
+        choices = getattr(response, "choices", None)
+        if isinstance(choices, Mapping):
+            answer = choices.get(QUESTION_ID)
     if answer is None:
         raise ClassificationError("응답에 vehicle_class Choice가 없습니다.")
 
@@ -443,19 +523,17 @@ def _features_from_state(state: Mapping[str, Any]) -> VehicleFeatures:
 
 
 def _weak_guess(length_m: float | None) -> str:
+    """길이만 있을 때의 기울임. 공식 규칙이 아니므로 호출부가 low와 같이 씁니다."""
+
     if length_m is None:
         return "class_01"
-    if length_m < 2.5:
-        return "class_12"
-    if length_m < 5.2:
+    if length_m < 6.0:
         return "class_01"
-    if length_m < 6.5:
-        return "class_05"
-    if length_m < 8.5:
-        return "class_06"
-    if length_m < 11.0:
+    if length_m < 9.0:
+        return "class_04"
+    if length_m < 12.0:
         return "class_02"
-    return "class_07"
+    return "class_05"
 
 
 def _check_threshold(threshold: float) -> None:
